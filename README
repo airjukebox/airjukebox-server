@@ -1,0 +1,36 @@
+AirCentral API
+====
+
+Background
+---
+This is the core AirJukebox API service, which will be hosted on the public
+Internet.  It is a RESTful HTTP web service, written in Python and using the
+CherryPy web framework.
+
+The service also utilizes a back-end instance of the open source Apache Solr
+search engine; this provides persistent storage for channels and song requests,
+and search services over this data.
+
+Required Packages:
+---
+sudo apt-get install python-virtualenv
+sudo apt-get install python python-dev
+sudo apt-get install libpq-dev
+
+Installation
+---
+The service is most easily run from the command-line using a Python 'virtualenv'
+environment.  The steps to get the service running under a typical Linux
+distribution are given below:
+
+# python virtual environment and dependencies
+virtualenv env
+source env/bin/activate
+easy_install cherrypy psycopg2 solrpy
+
+# backend solr service
+cd solr
+java -jar start.jar
+
+# api service
+python service.py

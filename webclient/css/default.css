@@ -1,0 +1,32 @@
+body {
+	font-family: arial;
+}
+
+input {
+	border: solid 1px silver;
+	margin: 0px;
+}
+
+div.section {
+	border: solid 1px silver;
+	margin-right: 16px;
+	padding: 12px;
+}
+
+td, th {
+	font-size: small;
+	text-align: left;
+}
+
+#request {
+	float: left;
+}
+
+#playback {
+	float: left;
+}
+
+#playlist span {
+	margin-left: 4px;
+	font-size: small;
+}

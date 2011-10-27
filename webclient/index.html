@@ -1,0 +1,139 @@
+<html>
+  <head>
+    <title>airjukebox web client</title>
+    <link rel="stylesheet" type="text/css" href="css/default.css" />
+    <script language="javascript" src="js/jquery-1.6.4.min.js"></script>
+    <script language="javascript" src="js/jquery.json-2.3.min.js"></script>
+    <script language="javascript" src="js/jquery.query.js"></script>
+    <script language="javascript">
+function channelURL() {
+	var channel_id = $('#channels').val();
+	var channelURL = '/channels/' + channel_id;
+
+	return channelURL;
+}
+
+function refreshChannels(channel_id) {
+
+	var rootURL = '/channels';
+
+	$('#channels').empty();
+	$.getJSON(rootURL, function (data) {
+		for (idx in data.channels) {
+			var option = $('<option />').text(data.channels[idx]).val(data.channels[idx]);
+			$('#channels').append(option);
+		}
+		$('#channels').val(channel_id);
+		refreshPlayback();
+	});
+}
+
+function refreshPlayback() {
+	var playbackURL = channelURL() + '/playback';
+
+	$.getJSON(playbackURL, function (data) {
+
+		$('#playlist').empty();
+		for (idx in data.playlist) {
+			var request = data.playlist[idx];
+
+			var track = $('<li>').html(request.track_artist + ' - ' + request.track_title);
+			var upvote = $('<span onClick="submit(' + request.request_track_id + ')">upvote</span>');
+			var skip = $('<span onClick="skip(' + request.request_track_id + ')">skip</span>');
+
+			track.append(upvote);
+			track.append(skip);
+
+			$('#playlist').append(track);
+		}
+	});
+}
+
+function submit(track_id) {
+
+	var user_id = $('#user').val();
+
+	var request = $.toJSON({
+		'userid': user_id,
+		'requests': [{'sourceid': 'grooveshark', 'trackid': track_id}]
+	});
+	var requestURL = channelURL() + '/requests/submit?json=' + encodeURI(request);
+
+	$.get(requestURL, function(data) {
+		refreshPlayback();
+	});
+}
+
+function skip(track_id) {
+
+	var user_id = $('#user').val();
+
+	var requestURL = channelURL() + '/requests/skip?user_id=' + user_id + '&source_id=grooveshark&track_id=' + track_id;
+
+	$.get(requestURL, function(data) {
+		refreshPlayback();
+	});
+}
+
+function search(query) {
+
+	var searchURL = channelURL() + '/requests' + '/search?q=' + query;
+
+	$.getJSON(searchURL, function(data) {
+
+		$('#results').empty();
+		for (idx in data) {
+			var result = data[idx];
+			var track_id = result.sources[0].trackid;
+
+			$('#results').append('<li onClick="submit(' + track_id + ')">' + result.artist + ' - ' + result.title + '</li>');
+		}
+
+	});
+}
+
+$(document).ready(function() {
+
+	var channel_id = $.query.get('channel') || 'test';
+	var user_id = 'test';
+	var query = $.query.get('query') || '';
+
+	$('#user').val(user_id);
+	$('#query').val(query);
+
+	$('#search').click(function() { search($('#query').val()); });
+	$('#channels').change(function() { refreshPlayback(); });
+
+	refreshChannels(channel_id);
+
+});
+    </script>
+  </head>
+  <body>
+    <div id="request" class="section">
+      <table>
+        <tr>
+          <th>Channel</th>
+          <td><select id="channels" /></td>
+        </tr>
+        <tr>
+          <th>UserID</th>
+          <td><input type="text" name="user" id="user" /></td>
+        </tr>
+        <tr>
+          <th>Query</th>
+          <td><input type="text" name="query" id="query" /></td>
+        </tr>
+        <tr>
+          <th />
+          <td><input type="button" value="Search" id="search" /></td>
+        </tr>
+      </table>
+      <ul id="results" />
+    </div>
+    <div id="playback" class="section">
+      <strong>Playlist</strong>
+      <ul id="playlist" />
+    </div>
+  </body>
+</html>

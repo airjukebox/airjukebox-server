@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<schema name="airjukebox" version="1.4">
+
+  <types>
+
+    <fieldType name="string" class="solr.StrField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="boolean" class="solr.BoolField" sortMissingLast="true" omitNorms="true"/>
+    <fieldType name="binary" class="solr.BinaryField"/>
+
+    <fieldType name="int" class="solr.TrieIntField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="float" class="solr.TrieFloatField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="long" class="solr.TrieLongField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="double" class="solr.TrieDoubleField" precisionStep="0" omitNorms="true" positionIncrementGap="0"/>
+
+    <fieldType name="tint" class="solr.TrieIntField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="tfloat" class="solr.TrieFloatField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="tlong" class="solr.TrieLongField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
+    <fieldType name="tdouble" class="solr.TrieDoubleField" precisionStep="8" omitNorms="true" positionIncrementGap="0"/>
+
+    <fieldType name="date" class="solr.TrieDateField" omitNorms="true" precisionStep="0" positionIncrementGap="0"/>
+    <fieldType name="tdate" class="solr.TrieDateField" omitNorms="true" precisionStep="6" positionIncrementGap="0"/>
+
+    <fieldType name="text" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.StandardTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <fieldType name="location" class="solr.LatLonType" subFieldSuffix="_coordinate"/>
+    <fieldType name="geohash" class="solr.GeoHashField"/>
+
+    <fieldType name="ignored" stored="false" indexed="false" multiValued="true" class="solr.StrField" />
+ </types>
+
+ <fields>
+
+   <!-- Common Fields -->
+   <field name="id" type="string" indexed="true" stored="true" required="true" />
+   <field name="type" type="string" indexed="true" stored="true" required="true" />
+   <field name="datetime" type="tdate" indexed="true" stored="true" required="true" default="NOW" />
+   <field name="search" type="text" indexed="true" stored="false" multiValued="true" />
+
+   <!-- Channel Fields -->
+   <field name="channel_id" type="string" indexed="true" stored="true" />
+   <field name="channel_location" type="geohash" indexed="true" stored="true" />
+
+   <!-- Track Fields -->
+   <field name="track_title" type="string" indexed="true" stored="true" />
+   <field name="track_artist" type="string" indexed="true" stored="true" />
+   <field name="track_album" type="string" indexed="true" stored="true" />
+
+   <!-- Request Fields -->
+   <field name="request_user_id" type="string" indexed="true" stored="true" />
+   <field name="request_source_id" type="string" indexed="true" stored="true" />
+   <field name="request_track_id" type="string" indexed="true" stored="true" />
+
+   <dynamicField name="*" type="ignored" multiValued="true" />
+   
+ </fields>
+
+ <uniqueKey>id</uniqueKey>
+ <defaultSearchField>search</defaultSearchField>
+ <solrQueryParser defaultOperator="OR"/>
+
+ <copyField dest="search" source="track_title" />
+ <copyField dest="search" source="track_artist" />
+ <copyField dest="search" source="track_album" />
+
+</schema>
